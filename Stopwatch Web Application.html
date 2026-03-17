@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prodigy Infotech · cosmic lap timer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    }
+
+    /* ---------- UNIQUE ANIMATED STARRY BACKGROUND ---------- */
+    body {
+      min-height: 100vh;
+      background: #0a0f1e;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      overflow-x: hidden;
+    }
+
+    /* star field */
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(2px 2px at 10px 20px, #fff, rgba(0,0,0,0)),
+                  radial-gradient(2px 2px at 30px 70px, #f8f0a0, rgba(0,0,0,0)),
+                  radial-gradient(3px 3px at 80px 40px, #b0e0ff, rgba(0,0,0,0)),
+                  radial-gradient(1px 1px at 120px 180px, #fff, rgba(0,0,0,0)),
+                  radial-gradient(4px 4px at 200px 250px, #ffdab9, rgba(0,0,0,0)),
+                  radial-gradient(2px 2px at 280px 70px, #e6e6fa, rgba(0,0,0,0)),
+                  radial-gradient(3px 3px at 350px 400px, #fffacd, rgba(0,0,0,0)),
+                  radial-gradient(2px 2px at 420px 150px, #87cefa, rgba(0,0,0,0)),
+                  radial-gradient(5px 5px at 500px 600px, #ffe4e1, rgba(0,0,0,0)),
+                  radial-gradient(2px 2px at 600px 300px, #b0c4de, rgba(0,0,0,0)),
+                  radial-gradient(3px 3px at 720px 550px, #dda0dd, rgba(0,0,0,0)),
+                  radial-gradient(2px 2px at 800px 80px, #f5deb3, rgba(0,0,0,0)),
+                  radial-gradient(4px 4px at 900px 420px, #afeeee, rgba(0,0,0,0)),
+                  radial-gradient(2px 2px at 1000px 700px, #ffb6c1, rgba(0,0,0,0)),
+                  radial-gradient(3px 3px at 150px 550px, #98fb98, rgba(0,0,0,0));
+      background-size: 200px 200px;
+      background-repeat: repeat;
+      opacity: 0.7;
+      animation: twinkle 5s infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes twinkle {
+      0% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    /* extra floating nebula */
+    body::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 30% 40%, rgba(100, 150, 255, 0.1) 0%, transparent 40%),
+                  radial-gradient(circle at 80% 70%, rgba(255, 180, 100, 0.1) 0%, transparent 45%);
+      animation: drift 30s infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes drift {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(-2%, -3%); }
+    }
+
+    /* stopwatch card (glass panel) */
+    .stopwatch-card {
+      position: relative;
+      z-index: 10;
+      background: rgba(18, 25, 45, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 240, 160, 0.25);
+      border-radius: 3.5rem;
+      padding: 2.5rem 2rem;
+      max-width: 780px;
+      width: 100%;
+      box-shadow: 0 30px 50px -20px #000, 0 0 0 1px rgba(255,215,0,0.2) inset;
+      transition: box-shadow 0.3s;
+    }
+
+    .stopwatch-card:hover {
+      box-shadow: 0 40px 70px -15px #000814, 0 0 0 2px #ffd966 inset;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      background: linear-gradient(120deg, #f9f3c5, #ffb87c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header p {
+      color: #b7d0ff;
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    .time-display {
+      background: #0a1222;
+      border-radius: 4rem;
+      padding: 1.8rem 1rem;
+      margin-bottom: 2rem;
+      text-align: center;
+      border: 1px solid #4a5b7a;
+      box-shadow: inset 0 5px 10px rgba(0,0,0,0.8), 0 10px 20px rgba(0,0,0,0.5);
+    }
+
+    #timer {
+      font-size: 5rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: #f8fafc;
+      text-shadow: 0 0 16px #6da1ff;
+      letter-spacing: 6px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      background: rgba(20, 30, 45, 0.8);
+      border: 1.5px solid #4e6188;
+      color: #eef5ff;
+      font-size: 1.2rem;
+      font-weight: 600;
+      padding: 1rem 2rem;
+      border-radius: 3rem;
+      min-width: 120px;
+      backdrop-filter: blur(4px);
+      cursor: pointer;
+      transition: 0.2s ease;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn:active { transform: scale(0.96); }
+
+    .btn-start {
+      background: #0f3b3f;
+      border-color: #2dd4bf;
+      color: #caf0f0;
+      box-shadow: 0 0 12px #2dd4bf66;
+    }
+    .btn-start:hover {
+      background: #1e5a5f;
+      border-color: #5eead4;
+      box-shadow: 0 0 24px #2dd4bf;
+    }
+
+    .btn-pause {
+      background: #5f3a2b;
+      border-color: #fbbf24;
+      color: #ffefcf;
+    }
+    .btn-pause:hover {
+      background: #8b5e3c;
+      border-color: #fcd34d;
+      box-shadow: 0 0 24px #fbbf24;
+    }
+
+    .btn-reset {
+      background: #312b3f;
+      border-color: #c084fc;
+      color: #ede9fe;
+    }
+    .btn-reset:hover {
+      background: #4f3f6b;
+      border-color: #d8b4fe;
+      box-shadow: 0 0 24px #c084fc;
+    }
+
+    .btn-lap {
+      background: #253a4a;
+      border-color: #60a5fa;
+      color: #dbeafe;
+    }
+    .btn-lap:hover {
+      background: #2f5670;
+      border-color: #93c5fd;
+      box-shadow: 0 0 24px #60a5fa;
+    }
+
+    /* lap section with integrated clear button */
+    .lap-section {
+      background: rgba(10, 16, 26, 0.7);
+      border-radius: 2rem;
+      padding: 1.5rem 1.2rem;
+      border: 1px solid #3f4e69;
+      margin-bottom: 1rem;
+    }
+
+    .lap-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #cbd5e1;
+      font-weight: 600;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px dashed #60758b;
+      margin-bottom: 0.8rem;
+    }
+
+    .lap-header-left {
+      display: flex;
+      gap: 1.2rem;
+      align-items: center;
+    }
+
+    .clear-laps-btn {
+      background: none;
+      border: 1.5px solid #a0aec0;
+      color: #f0c0a0;
+      font-size: 0.9rem;
+      padding: 0.3rem 1rem;
+      border-radius: 3rem;
+      cursor: pointer;
+      transition: 0.2s;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .clear-laps-btn:hover {
+      background: #4a3a4a;
+      border-color: #ffa07a;
+      color: #ffe2c0;
+      box-shadow: 0 0 14px #ffa07a;
+    }
+
+    .lap-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 180px;
+      overflow-y: auto;
+      padding-right: 0.3rem;
+    }
+
+    .lap-item {
+      display: flex;
+      justify-content: space-between;
+      background: #1e2a3a;
+      padding: 0.6rem 1rem;
+      border-radius: 3rem;
+      color: #e1e9f5;
+      font-size: 1.1rem;
+      font-variant-numeric: tabular-nums;
+      border-left: 6px solid #f0b34b;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+
+    .empty-lap-message {
+      color: #7b8ca5;
+      text-align: center;
+      padding: 2rem 0;
+      font-style: italic;
+    }
+
+    /* ----- UNIQUE STATISTICS PANEL (fastest / average lap) ----- */
+    .stats-panel {
+      background: #101b2b;
+      border-radius: 2rem;
+      padding: 1.2rem 1.5rem;
+      border: 1px solid #eaab5f55;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 1rem;
+      margin-top: 1rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #b3c7ff;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fedb9f;
+      line-height: 1.3;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (max-width: 550px) {
+      .stopwatch-card { padding: 2rem 1rem; }
+      #timer { font-size: 3.2rem; letter-spacing: 2px; }
+      .btn { font-size: 1rem; padding: 0.8rem 1rem; min-width: 85px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stopwatch-card">
+    <div class="header">
+      <h1>✨ PRODIGY TIMER ✨</h1>
+      <p>starry background · lap stats · clear laps</p>
+    </div>
+
+    <div class="time-display">
+      <span id="timer">00:00.00</span>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-start" id="startBtn">▶ Start</button>
+      <button class="btn btn-pause" id="pauseBtn">⏸️ Pause</button>
+      <button class="btn btn-reset" id="resetBtn">↺ Reset</button>
+      <button class="btn btn-lap" id="lapBtn">⏱️ Lap</button>
+    </div>
+
+    <!-- Lap section with integrated clear button -->
+    <div class="lap-section">
+      <div class="lap-header">
+        <div class="lap-header-left">
+          <span>📋 Lap records</span>
+          <button class="clear-laps-btn" id="clearLapsBtn">🗑️ Clear laps</button>
+        </div>
+        <span>cumulative</span>
+      </div>
+      <ul class="lap-list" id="lapList">
+        <li class="empty-lap-message">— tap Lap to begin —</li>
+      </ul>
+    </div>
+
+    <!-- STATISTICS PANEL (fastest lap, average lap, total laps) -->
+    <div class="stats-panel" id="statsPanel">
+      <div class="stat-item">
+        <div class="stat-label">Total laps</div>
+        <div class="stat-value" id="totalLapsStat">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Fastest lap</div>
+        <div class="stat-value" id="fastestLapStat">—</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Average lap</div>
+        <div class="stat-value" id="avgLapStat">—</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ----- DOM elements -----
+      const timerEl = document.getElementById('timer');
+      const startBtn = document.getElementById('startBtn');
+      const pauseBtn = document.getElementById('pauseBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const lapBtn = document.getElementById('lapBtn');
+      const clearLapsBtn = document.getElementById('clearLapsBtn');
+      const lapList = document.getElementById('lapList');
+      const totalLapsSpan = document.getElementById('totalLapsStat');
+      const fastestLapSpan = document.getElementById('fastestLapStat');
+      const avgLapSpan = document.getElementById('avgLapStat');
+
+      // ----- stopwatch state -----
+      let startTime = 0;            // performance.now() when started/resumed
+      let elapsedMs = 0;            // total elapsed ms (without current running)
+      let running = false;
+      let intervalId = null;
+      let lapCounter = 1;           // next lap number
+
+      // ----- unique: store cumulative lap times (ms) for statistics -----
+      let lapCumulativeTimes = [];   // each entry is the elapsed ms at lap moment
+
+      // ----- helpers -----
+      function formatTime(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const hundredths = Math.floor((ms % 1000) / 10);
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${hundredths.toString().padStart(2, '0')}`;
+      }
+
+      function updateDisplay() {
+        let currentMs = elapsedMs;
+        if (running) {
+          currentMs += (performance.now() - startTime);
+        }
+        timerEl.textContent = formatTime(currentMs);
+      }
+
+      function tick() {
+        if (running) updateDisplay();
+      }
+
+      // ----- compute lap durations from cumulative times -----
+      function computeLapDurations() {
+        if (lapCumulativeTimes.length === 0) return [];
+        const durations = [];
+        for (let i = 0; i < lapCumulativeTimes.length; i++) {
+          const prev = i === 0 ? 0 : lapCumulativeTimes[i-1];
+          durations.push(lapCumulativeTimes[i] - prev);
+        }
+        return durations;
+      }
+
+      // ----- update statistics panel -----
+      function updateStats() {
+        const total = lapCumulativeTimes.length;
+        totalLapsSpan.textContent = total;
+
+        if (total === 0) {
+          fastestLapSpan.textContent = '—';
+          avgLapSpan.textContent = '—';
+          return;
+        }
+
+        const durations = computeLapDurations();
+        const fastest = Math.min(...durations);
+        const average = durations.reduce((a, b) => a + b, 0) / total;
+
+        fastestLapSpan.textContent = formatTime(fastest);
+        avgLapSpan.textContent = formatTime(average);
+      }
+
+      // ----- record a lap (stores cumulative, displays it) -----
+      function recordLap() {
+        // current total elapsed
+        let currentMs = elapsedMs;
+        if (running) {
+          currentMs += (performance.now() - startTime);
+        }
+
+        // store cumulative
+        lapCumulativeTimes.push(currentMs);
+
+        // remove placeholder if first lap
+        if (lapList.children.length === 1 && lapList.children[0].classList.contains('empty-lap-message')) {
+          lapList.innerHTML = '';
+        }
+
+        // create list item (show cumulative time)
+        const lapItem = document.createElement('li');
+        lapItem.className = 'lap-item';
+        lapItem.innerHTML = `<span>Lap ${lapCounter++}</span><span>${formatTime(currentMs)}</span>`;
+        lapList.appendChild(lapItem);
+
+        // auto-scroll
+        lapItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        // update stats
+        updateStats();
+      }
+
+      // ----- clear laps only (without resetting main timer) -----
+      function clearLapsOnly() {
+        lapList.innerHTML = '<li class="empty-lap-message">— no laps recorded —</li>';
+        lapCounter = 1;
+        lapCumulativeTimes = [];
+        updateStats();   // zeros out stats
+      }
+
+      // ----- reset everything (timer + laps) -----
+      function fullReset() {
+        if (running) {
+          running = false;
+        }
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+        elapsedMs = 0;
+        startTime = 0;
+        updateDisplay();
+        clearLapsOnly();  // reuse lap clearing (also updates stats)
+      }
+
+      // ----- start -----
+      function start() {
+        if (running) return;
+        running = true;
+        startTime = performance.now();
+        if (!intervalId) {
+          intervalId = setInterval(tick, 10);
+        }
+      }
+
+      // ----- pause -----
+      function pause() {
+        if (!running) return;
+        elapsedMs += (performance.now() - startTime);
+        running = false;
+        updateDisplay();
+      }
+
+      // ----- Event listeners -----
+      startBtn.addEventListener('click', start);
+      pauseBtn.addEventListener('click', pause);
+      resetBtn.addEventListener('click', fullReset);
+      lapBtn.addEventListener('click', recordLap);
+      clearLapsBtn.addEventListener('click', clearLapsOnly);
+
+      // initial display
+      updateDisplay();
+
+      // clean interval on page unload
+      window.addEventListener('beforeunload', () => {
+        if (intervalId) clearInterval(intervalId);
+      });
+    })();
+  </script>
+</body>
+</html>
