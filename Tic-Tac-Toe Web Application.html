@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prodigy · Tic‑Tac‑Toe (AI / 2‑player)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #0e1628, #1a2540);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .game-container {
+      background: rgba(20, 30, 50, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 215, 140, 0.3);
+      border-radius: 3.5rem;
+      padding: 2.5rem 2rem;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 30px 50px -20px #000000, 0 0 0 1px rgba(255,200,120,0.2) inset;
+      transition: box-shadow 0.3s;
+    }
+
+    .game-container:hover {
+      box-shadow: 0 40px 60px -15px #030614, 0 0 0 2px #f6c97e inset;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #f9e1a0, #ffb882);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .sub {
+      text-align: center;
+      color: #adc4ff;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    /* mode toggle */
+    .mode-switch {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      background: #1e2a3a;
+      padding: 0.6rem;
+      border-radius: 4rem;
+      border: 1px solid #4e6188;
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: #b3c7ff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 0.7rem 2rem;
+      border-radius: 3rem;
+      cursor: pointer;
+      transition: 0.2s;
+      flex: 1;
+      white-space: nowrap;
+    }
+
+    .mode-btn.active {
+      background: #f5b34b;
+      color: #1a1f2f;
+      box-shadow: 0 0 15px #f5b34b;
+    }
+
+    /* turn indicator */
+    .turn-indicator {
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #e7efff;
+      text-shadow: 0 0 8px #6495ed;
+      background: #0f1a2b;
+      padding: 0.8rem;
+      border-radius: 4rem;
+      border: 1px solid #7d6b40;
+    }
+
+    /* game board grid */
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .cell {
+      aspect-ratio: 1 / 1;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(4px);
+      border: 2px solid #b89b6b;
+      border-radius: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      font-weight: 700;
+      color: #f5e7c8;
+      text-shadow: 0 0 20px currentColor;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 10px 15px -5px rgba(0,0,0,0.6);
+    }
+
+    .cell.win-highlight {
+      background: #5f4a2eaa;
+      border-color: #ffd966;
+      box-shadow: 0 0 30px #ffb347;
+      color: #fff5d0;
+    }
+
+    .cell:active:not(.disabled) {
+      transform: scale(0.95);
+    }
+
+    .cell.X {
+      color: #a0d6ff;
+      text-shadow: 0 0 22px #3b82f6;
+    }
+
+    .cell.O {
+      color: #ffc7a2;
+      text-shadow: 0 0 22px #f97316;
+    }
+
+    .cell.disabled {
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+
+    .reset-btn {
+      display: block;
+      width: fit-content;
+      margin: 0 auto 1rem;
+      background: #253a4a;
+      border: 2px solid #60a5fa;
+      color: #dbeafe;
+      font-size: 1.3rem;
+      font-weight: 600;
+      padding: 1rem 3rem;
+      border-radius: 4rem;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 8px 16px #00000055;
+    }
+
+    .reset-btn:hover {
+      background: #2f5670;
+      border-color: #93c5fd;
+      box-shadow: 0 0 25px #60a5fa;
+    }
+
+    .footer {
+      text-align: center;
+      color: #8599bb;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 450px) {
+      .game-container { padding: 1.5rem; }
+      .cell { font-size: 3.5rem; border-radius: 1.2rem; }
+      .mode-btn { padding: 0.5rem 1rem; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>✧ TIC‑TAC‑TOE ✧</h1>
+    <div class="sub">PRODIGY INFOTECH · task 03</div>
+
+    <!-- mode toggle: 2‑player / vs AI -->
+    <div class="mode-switch">
+      <button class="mode-btn active" id="mode2p">👥 2‑Player</button>
+      <button class="mode-btn" id="modeAI">🤖 vs AI</button>
+    </div>
+
+    <!-- turn / winner message -->
+    <div class="turn-indicator" id="turnIndicator">Player X's turn</div>
+
+    <!-- game grid -->
+    <div class="board" id="board">
+      <!-- 9 cells will be generated by js -->
+    </div>
+
+    <!-- reset button -->
+    <button class="reset-btn" id="resetBtn">↺ New Game</button>
+    <div class="footer">click any cell to start</div>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- Game state ----------
+      let board = ['', '', '', '', '', '', '', '', ''];
+      let currentPlayer = 'X';           // X always starts
+      let gameActive = true;
+      let vsAI = false;                  // false = two-player, true = vs AI
+      let aiTimeout = null;              // to handle AI move delay
+
+      // DOM elements
+      const boardEl = document.getElementById('board');
+      const turnIndicator = document.getElementById('turnIndicator');
+      const mode2pBtn = document.getElementById('mode2p');
+      const modeAIBtn = document.getElementById('modeAI');
+      const resetBtn = document.getElementById('resetBtn');
+
+      // Win combinations (indices)
+      const winPatterns = [
+        [0,1,2], [3,4,5], [6,7,8],  // rows
+        [0,3,6], [1,4,7], [2,5,8],  // cols
+        [0,4,8], [2,4,6]            // diagonals
+      ];
+
+      // Helper to render board (update cell content & class)
+      function renderBoard() {
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach((cell, i) => {
+          cell.textContent = board[i];
+          // remove previous X/O specific classes then add if needed
+          cell.classList.remove('X', 'O', 'win-highlight');
+          if (board[i] === 'X') cell.classList.add('X');
+          if (board[i] === 'O') cell.classList.add('O');
+        });
+      }
+
+      // Check winner, returns object { winner: 'X' or 'O' or 'draw' or null, winningCombo: array }
+      function checkGameState() {
+        // check win
+        for (let pattern of winPatterns) {
+          const [a,b,c] = pattern;
+          if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+            return { winner: board[a], winningCombo: pattern };
+          }
+        }
+        // check draw (no empty cells)
+        if (board.every(cell => cell !== '')) {
+          return { winner: 'draw', winningCombo: null };
+        }
+        return { winner: null, winningCombo: null };
+      }
+
+      // Highlight winning cells (if any)
+      function highlightWinningCombo(combo) {
+        if (!combo) return;
+        const cells = document.querySelectorAll('.cell');
+        combo.forEach(idx => {
+          cells[idx].classList.add('win-highlight');
+        });
+      }
+
+      // Update turn indicator based on state
+      function updateTurnMessage() {
+        if (!gameActive) {
+          const result = checkGameState();
+          if (result.winner === 'draw') {
+            turnIndicator.textContent = "🤝 It's a draw!";
+          } else if (result.winner) {
+            turnIndicator.textContent = "🏆 Player " + result.winner + " wins!";
+          } else {
+            turnIndicator.textContent = "Player " + currentPlayer + "'s turn"; // fallback
+          }
+        } else {
+          turnIndicator.textContent = "Player " + currentPlayer + "'s turn";
+        }
+      }
+
+      // After any move, check win/draw, update UI, and handle AI turn if needed
+      function handleMove(index) {
+        if (!gameActive) return false;            // game ended
+        if (board[index] !== '') return false;    // cell occupied
+
+        // place marker
+        board[index] = currentPlayer;
+        renderBoard();
+
+        // check win/draw
+        const state = checkGameState();
+        if (state.winner) {
+          gameActive = false;
+          if (state.winner !== 'draw') {
+            highlightWinningCombo(state.winningCombo);
+          }
+          updateTurnMessage();
+          return true;  // move processed, game ended
+        }
+
+        // no win/draw, switch player
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        updateTurnMessage();
+
+        // if game still active and vsAI and current player is O (AI), trigger AI move
+        if (gameActive && vsAI && currentPlayer === 'O') {
+          // clear any pending AI timeout
+          if (aiTimeout) clearTimeout(aiTimeout);
+          aiTimeout = setTimeout(makeAIMove, 300); // slight delay for natural feel
+        }
+
+        return true;
+      }
+
+      // Simple AI: pick a random empty cell
+      function makeAIMove() {
+        aiTimeout = null;
+        // only if game active, vs AI, and current player is O
+        if (!gameActive || !vsAI || currentPlayer !== 'O') return;
+
+        // collect empty indices
+        const emptyIndices = board.reduce((acc, cell, idx) => {
+          if (cell === '') acc.push(idx);
+          return acc;
+        }, []);
+
+        if (emptyIndices.length === 0) return; // should be draw, but check anyway
+
+        // choose random
+        const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+        // execute move
+        handleMove(randomIndex);
+      }
+
+      // Reset game (clear board, X starts, active)
+      function resetGame() {
+        // cancel any scheduled AI move
+        if (aiTimeout) {
+          clearTimeout(aiTimeout);
+          aiTimeout = null;
+        }
+
+        board = ['', '', '', '', '', '', '', '', ''];
+        currentPlayer = 'X';
+        gameActive = true;
+        renderBoard();
+        updateTurnMessage();
+
+        // if vsAI and current player is X (human), no auto move. AI will move after human plays.
+        // if vsAI and we want AI to start? Usually human starts, that's fine.
+      }
+
+      // Cell click handler
+      function cellClickHandler(index) {
+        // if game over, ignore
+        if (!gameActive) return;
+        // if vsAI and it's O's turn, block human from playing (AI's turn)
+        if (vsAI && currentPlayer === 'O') return;
+
+        // human move (X always, or O in 2P mode)
+        handleMove(index);
+      }
+
+      // Build board dynamically
+      function createBoard() {
+        boardEl.innerHTML = '';
+        for (let i = 0; i < 9; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.index = i;
+          cell.addEventListener('click', function() { cellClickHandler(i); });
+          boardEl.appendChild(cell);
+        }
+        renderBoard();
+      }
+
+      // Toggle mode
+      function setMode(mode) {
+        vsAI = (mode === 'ai');
+        // update active button style
+        mode2pBtn.classList.toggle('active', !vsAI);
+        modeAIBtn.classList.toggle('active', vsAI);
+
+        // cancel any pending AI move
+        if (aiTimeout) {
+          clearTimeout(aiTimeout);
+          aiTimeout = null;
+        }
+
+        // reset game automatically when switching modes (clean state)
+        resetGame();
+      }
+
+      // Event listeners for mode buttons
+      mode2pBtn.addEventListener('click', function() { setMode('2p'); });
+      modeAIBtn.addEventListener('click', function() { setMode('ai'); });
+
+      // Reset button
+      resetBtn.addEventListener('click', resetGame);
+
+      // Initialize
+      createBoard();
+      updateTurnMessage();
+    })();
+  </script>
+</body>
+</html>
