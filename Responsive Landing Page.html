@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prodigy Infotech · creative pop‑up experience</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 90px;
+    }
+
+    /* ----- FIXED NAVIGATION (glassmorphism) ----- */
+    #navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.4rem 3rem;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      transition: background 0.4s, padding 0.3s, box-shadow 0.3s;
+      z-index: 999;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    #navbar.scrolled {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      padding: 0.9rem 3rem;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+    }
+
+    .logo {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #fff, #f0e68c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transition: all 0.3s;
+    }
+
+    #navbar.scrolled .logo {
+      background: linear-gradient(135deg, #1e2b3a, #2c3e50);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 3rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1.2rem;
+      color: white;
+      padding: 0.5rem 0;
+      transition: color 0.25s, text-shadow 0.25s, border 0.25s;
+      border-bottom: 2px solid transparent;
+    }
+
+    .nav-links a:hover {
+      color: #ffdd77 !important;
+      border-bottom-color: #ffdd77;
+      text-shadow: 0 0 8px rgba(255, 221, 119, 0.5);
+    }
+
+    #navbar.scrolled .nav-links a {
+      color: #1e293b;
+    }
+
+    #navbar.scrolled .nav-links a:hover {
+      color: #f97316 !important;
+      border-bottom-color: #f97316;
+    }
+
+    /* ----- CREATIVE ANIMATED BACKGROUNDS per section ----- */
+    section {
+      min-height: 100vh;
+      padding: 8rem 2rem 4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    /* animated gradient blobs */
+    section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+    }
+
+    section::after {
+      content: '';
+      position: absolute;
+      width: 150%;
+      height: 150%;
+      top: -25%;
+      left: -25%;
+      background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.15) 0%, transparent 50%);
+      animation: rotateSlow 30s linear infinite;
+      z-index: -1;
+    }
+
+    @keyframes rotateSlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #home {
+      background: linear-gradient(-45deg, #0b1820, #1d3a4e, #2b4c61, #1f3a48);
+      background-size: 300% 300%;
+      animation: gradientShift 12s ease infinite;
+    }
+
+    #about {
+      background: linear-gradient(135deg, #261e2c, #3a2f40, #4e3f55, #392f42);
+      background-size: 250% 250%;
+      animation: gradientShift 15s ease infinite alternate;
+    }
+
+    #services {
+      background: linear-gradient(45deg, #162b32, #1f3f48, #29545e, #1c3f47);
+      background-size: 300% 300%;
+      animation: gradientShift 18s ease infinite;
+    }
+
+    #contact {
+      background: linear-gradient(145deg, #1f2937, #111827, #1e293b, #0b1622);
+      background-size: 250% 250%;
+      animation: gradientShift 14s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    h1 {
+      font-size: 4rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: white;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      letter-spacing: -0.02em;
+    }
+
+    .section-desc {
+      max-width: 800px;
+      font-size: 1.3rem;
+      color: rgba(255,255,255,0.9);
+      background: rgba(0,0,0,0.2);
+      backdrop-filter: blur(6px);
+      padding: 1.2rem 2.2rem;
+      border-radius: 60px;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    /* ----- SERVICES CARDS (with pop‑up trigger) ----- */
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .service-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 32px;
+      padding: 2rem 1.8rem;
+      width: 260px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 25px 40px -12px rgba(0,0,0,0.5);
+      transition: transform 0.3s, box-shadow 0.4s;
+      cursor: pointer;
+    }
+
+    .service-card:hover {
+      transform: translateY(-15px) scale(1.02);
+      box-shadow: 0 30px 50px -10px black;
+      border-color: rgba(255, 221, 119, 0.6);
+    }
+
+    .service-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 4px 6px #00000055);
+    }
+
+    .service-card h3 {
+      font-size: 1.9rem;
+      margin-bottom: 0.8rem;
+      font-weight: 600;
+    }
+
+    .service-card p {
+      font-size: 1rem;
+      margin-bottom: 1.8rem;
+      opacity: 0.9;
+    }
+
+    .popup-btn {
+      background: rgba(255,255,240,0.2);
+      border: 2px solid white;
+      color: white;
+      font-weight: 600;
+      padding: 0.7rem 1.5rem;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: all 0.25s;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(4px);
+    }
+
+    .popup-btn:hover {
+      background: #ffdd77;
+      border-color: #ffdd77;
+      color: #1e293b;
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #ffdd77;
+    }
+
+    /* ----- POP‑UP MODAL (the "pop up thinks") ----- */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: rgba(20, 30, 40, 0.95);
+      backdrop-filter: blur(15px);
+      border: 2px solid rgba(255, 221, 119, 0.7);
+      border-radius: 48px;
+      padding: 2.5rem 3rem;
+      max-width: 450px;
+      width: 90%;
+      color: white;
+      box-shadow: 0 40px 70px rgba(0,0,0,0.6), 0 0 0 2px #ffdd7740 inset;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-content h2 {
+      font-size: 2.6rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px dashed #ffdd77;
+      padding-bottom: 0.5rem;
+    }
+
+    .modal-content p {
+      font-size: 1.2rem;
+      margin: 1.5rem 0;
+      line-height: 1.6;
+      color: #e0e7ff;
+    }
+
+    .close-modal {
+      background: #ffdd77;
+      border: none;
+      color: #1e293b;
+      font-size: 1.3rem;
+      font-weight: 700;
+      padding: 0.7rem 2rem;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: 0.2s;
+      border: 2px solid transparent;
+    }
+
+    .close-modal:hover {
+      background: #ffe4a1;
+      box-shadow: 0 0 25px #ffdd77;
+      transform: scale(1.02);
+    }
+
+    /* footer */
+    .page-footer {
+      text-align: center;
+      padding: 2rem;
+      background: #0e151c;
+      color: #cbd5e1;
+    }
+
+    /* responsive */
+    @media (max-width: 800px) {
+      #navbar { padding: 1rem 2rem; flex-direction: column; gap: 0.5rem; }
+      #navbar.scrolled { padding: 0.8rem 2rem; }
+      .nav-links { gap: 1.8rem; }
+      h1 { font-size: 3rem; }
+      .card-container { gap: 1.5rem; }
+    }
+
+    @media (max-width: 500px) {
+      .nav-links { gap: 1rem; }
+      .nav-links a { font-size: 1rem; }
+      .logo { font-size: 1.5rem; }
+      .modal-content { padding: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fixed Navbar -->
+  <nav id="navbar">
+    <div class="logo">✦ PRODIGY INFOTECH</div>
+    <ul class="nav-links">
+      <li><a href="#home">HOME</a></li>
+      <li><a href="#about">ABOUT</a></li>
+      <li><a href="#services">SERVICES</a></li>
+      <li><a href="#contact">CONTACT</a></li>
+    </ul>
+  </nav>
+
+  <!-- SECTIONS with creative backgrounds -->
+  <section id="home">
+    <h1>creative & interactive</h1>
+    <p class="section-desc">Scroll down — fixed navbar changes. Hover links for golden glow.<br>Backgrounds are alive with animated gradients.</p>
+  </section>
+
+  <section id="about">
+    <h1>who we are</h1>
+    <p class="section-desc">We design digital experiences with a pop. Every card hides a surprise modal.</p>
+  </section>
+
+  <!-- SERVICES section with cards that trigger pop‑up modals -->
+  <section id="services">
+    <h1>our services</h1>
+    <p class="section-desc" style="margin-bottom: 1rem;">click on "pop up" to see magic ✦</p>
+
+    <div class="card-container">
+      <!-- Card 1 -->
+      <div class="service-card" data-service="web">
+        <div class="service-icon">🌐</div>
+        <h3>Web Dev</h3>
+        <p>Responsive, fast, and creative websites.</p>
+        <button class="popup-btn" data-modal="modal1">pop up →</button>
+      </div>
+      <!-- Card 2 -->
+      <div class="service-card" data-service="uiux">
+        <div class="service-icon">✨</div>
+        <h3>UI/UX</h3>
+        <p>Intuitive interfaces, memorable journeys.</p>
+        <button class="popup-btn" data-modal="modal2">pop up →</button>
+      </div>
+      <!-- Card 3 -->
+      <div class="service-card" data-service="brand">
+        <div class="service-icon">⚡</div>
+        <h3>Brand strategy</h3>
+        <p>Identity that stands out.</p>
+        <button class="popup-btn" data-modal="modal3">pop up →</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <h1>get in touch</h1>
+    <p class="section-desc">📧 hello@prodigycreative.xyz &nbsp; | &nbsp; 📞 +1 (800) 456-7890</p>
+  </section>
+
+  <footer class="page-footer">
+    PRODIGY INFOTECH — task 01: interactive navbar + creative backgrounds + pop‑up modals
+  </footer>
+
+  <!-- POP‑UP MODALS (hidden by default) -->
+  <div id="modal1" class="modal-overlay">
+    <div class="modal-content">
+      <h2>🌐 web dev</h2>
+      <p>We build blazing‑fast, responsive sites with modern animations. Our stack: React, Vue, GSAP, and WebGL for that extra pop.</p>
+      <button class="close-modal">got it</button>
+    </div>
+  </div>
+
+  <div id="modal2" class="modal-overlay">
+    <div class="modal-content">
+      <h2>✨ ui/ux</h2>
+      <p>User‑centered designs that convert. We prototype, test, and deliver beautiful interfaces with micro‑interactions that delight.</p>
+      <button class="close-modal">got it</button>
+    </div>
+  </div>
+
+  <div id="modal3" class="modal-overlay">
+    <div class="modal-content">
+      <h2>⚡ brand strategy</h2>
+      <p>From logo to tone of voice – we craft identities that stick. Let your brand tell a story people remember.</p>
+      <button class="close-modal">got it</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- navbar scroll effect ----------
+      const navbar = document.getElementById('navbar');
+      function toggleNavOnScroll() {
+        if (window.scrollY > 20) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
+      }
+      window.addEventListener('scroll', toggleNavOnScroll);
+      toggleNavOnScroll();
+
+      // ---------- POP UP MODALS (the "pop up thinks") ----------
+      // get all modal overlays and buttons
+      const modals = document.querySelectorAll('.modal-overlay');
+      const popupBtns = document.querySelectorAll('.popup-btn');
+      const closeBtns = document.querySelectorAll('.close-modal');
+
+      // open modal when corresponding button is clicked
+      popupBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();   // avoid any card event
+          const modalId = btn.getAttribute('data-modal');  // e.g. "modal1"
+          const targetModal = document.getElementById(modalId);
+          if (targetModal) {
+            targetModal.classList.add('active');
+          }
+        });
+      });
+
+      // close modal when close button inside is clicked
+      closeBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // find the parent modal-overlay and remove active
+          const modal = btn.closest('.modal-overlay');
+          if (modal) modal.classList.remove('active');
+        });
+      });
+
+      // close modal if user clicks on the overlay (outside the content)
+      modals.forEach(modal => {
+        modal.addEventListener('click', (e) => {
+          // if the clicked element is the overlay itself (not modal-content)
+          if (e.target === modal) {
+            modal.classList.remove('active');
+          }
+        });
+      });
+
+      // optional: close with Escape key
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          modals.forEach(modal => modal.classList.remove('active'));
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
